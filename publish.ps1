@@ -12,13 +12,9 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
 
 gh auth status | Out-Null
 
-$existingRemote = ""
-$remoteOutput = & git remote get-url origin 2>$null
-if ($LASTEXITCODE -eq 0) {
-    $existingRemote = $remoteOutput
-}
-
-if ($existingRemote) {
+$remoteNames = git remote
+if ($remoteNames -contains "origin") {
+    $existingRemote = git remote get-url origin
     Write-Host "Using existing origin remote: $existingRemote"
     git push -u origin main
     exit 0
