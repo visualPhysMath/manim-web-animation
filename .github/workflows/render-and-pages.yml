@@ -27,7 +27,16 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libcairo2-dev libpango1.0-dev pkg-config python3-dev
+          sudo apt-get install -y \
+            ffmpeg \
+            libcairo2-dev \
+            libpango1.0-dev \
+            pkg-config \
+            python3-dev \
+            dvisvgm \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-fonts-recommended
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,13 +51,18 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Render animation
-        run: manim -qm main.py WebAnimation
+        run: manim -qm main.py
 
       - name: Prepare site
         run: |
           mkdir -p public
           cp index.html public/index.html
-          cp media/videos/main/720p30/WebAnimation.mp4 public/animation.mp4
+          rendered_video="$(find media/videos/main/720p30 -maxdepth 1 -name '*.mp4' | head -n 1)"
+          if [ -z "$rendered_video" ]; then
+            echo "No rendered video found"
+            exit 1
+          fi
+          cp "$rendered_video" public/animation.mp4
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
